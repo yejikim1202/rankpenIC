@@ -4,7 +4,7 @@
 
 
 ## Introduction
-`rankpenIC` is the R package to introduce the $L_1$ regularized Rank estimator tailored for interval-censored data, aiming for simultaneous estimation and variable selection when the data are partially interval-censored that include doubly-censored (DC) data and partly interval-censored (PIC) and possibly correlated within the same cluster.
+`rankpenIC` is the R package to introduce the $L_1$ regularized Rank estimator tailored for interval-censored data, aiming for simultaneous estimation and variable selection when the data are partially interval-censored that include doubly-censored (DC) data and partly interval-censored (PIC).
 Let $T$ and $X$ be the event time of interest and its related $p$-vector of covariates, respectively.
 Our main objective is to estimate 
 the $p$-dimensional linear coefficient vector ${\boldsymbol{\beta}}_0$
