@@ -1,0 +1,146 @@
+---
+title: "Introduction to rankpenIC package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to rankpenIC package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%",
+  fig.width = 7,
+  fig.height = 4,
+  fig.align = "center",
+  dpi = 150,
+  fig.path = "vignettes/rankpenIC"
+)
+```
+
+
+## Introduction
+
+`rankpenIC` is the R package to introduce the regularized Rank estimator tailored for interval-censored data, aiming for simultaneous estimation and variable selection when the data are partially interval-censored that include doubly-censored (DC) data and partly interval-censored (PIC).
+Let $T$ and $X$ be the event time of interest and its related $p$-vector of covariates, respectively.
+Our main objective is to estimate 
+the $p$-dimensional linear coefficient vector ${\boldsymbol{\beta}}_0$
+in the following linear linear regression model:
+$$
+T_i = {\bf x}_i^T {\boldsymbol{\beta}}_0 + \epsilon_i,\quad i=1, \ldots ,n, 
+$$
+where $\epsilon_i$ is the random error.
+When the data are subject to partially interval-censoring, 
+left and right endpoints of the censoring time, $L$ and $R$,
+are observed instead of $T$ such that $T\in(L,R)$.
+Note that double-censoring  can also  be viewed as 
+a special case of partly interval-censoring, 
+i.e., $T$ is left-censored if $L=0$ and right-censored if $R=\infty$. 
+
+
+
+## Usages
+
+Installation of rankpenIC package can be done by
+```{r results='hide', message=FALSE, warning=FALSE}
+devtools::install_github(repo="yejikim1202/rankpenIC")
+```
+
+or
+```{r results='hide', message=FALSE, warning=FALSE}
+base::require("rankpenIC")
+```
+
+
+rankIC() function has the following arguments:
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+rankIC(L=U,R=V,x=x,type=type,selection=selection,outlier=outlier,beta0 = beta0)
+```
+
+See the detailed description from help(picwls()) and help(dcwls()).
+
+We first simulate univariate partly interval-censored (PIC) data with normal random error, which is similar to PIC data simulation setting of Kim et al. (2023+).
+
+```{r message=FALSE, warning=FALSE}
+library(rankpenIC)
+library(survival)
+set.seed(111)
+n = 200
+x1 = runif(n,-1,1)
+x2 = rbinom(n,1,0.43)
+x = cbind(x1,x2)
+T = 2 + x1 + x2 + rnorm(n)
+U = (1 - 0.25*x1)*runif(n, -6, 5)
+V = U + (1 - 0.1*x2)*runif(n, 6, 20)+10
+U = exp(dplyr::case_when(TRUE ~ T, T>V ~ V, T<U ~ -Inf)); U=log(U)
+V = exp(dplyr::case_when(TRUE ~ T, T>V ~ Inf, T<U ~ U)); V=log(V)
+
+type=c("lasso","alasso","scad","oracle")[3]; selection=c("BIC","AIC","GCV")[3]; 
+outlier=c("without","with")[2]; beta0=c(1,1);
+rankpenIC::rankICpen(L=U,R=V,x=x,type=type,selection=selection,outlier=outlier,beta0 = beta0)$est
+```
+
+We posit two estimating methods, ipcw estimating method and doubly robust ipcw estimating method, which can be conducted by specifying estimation = NULL and estimation = "DR", respectively.
+
+Next, we simulate univariate doubly-censored (DC) data with normal random error, which is one of DC data simulation setting of Kim et al. (2023+).
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+n=200;
+x1=runif(n,-1.2,1.7); x2=rbinom(n,1,0.6)
+T = 1.7+x1+x2+rnorm(n)*(1-0.1*x2)
+L=runif(n,-2.8,1.9); R=L+runif(n,4.2,8.1)
+Y=pmin(R,pmax(T,L))
+delta=case_when(
+ T<L ~ 1,
+ T>R ~ 2,
+ TRUE ~ 0 #observed
+)
+L=L; R=R; T=T; delta=delta; x=cbind(x1,x2);
+
+type=c("lasso","alasso","scad","oracle")[3]; selection=c("BIC","AIC","GCV")[3]; 
+outlier=c("without","with")[2]; beta0=c(1,1);
+rankpenIC::rankICpen(L=L,R=R,x=x,type=type,selection=selection,outlier=outlier,beta0 = beta0)$est
+```
+
+We can choose one of three weighting types, the nonparametric KM estimating method, Beran's nonparametric KM estimating method, and Ishwaran's nonparametric survival random forests estimating method which can be accessible by using wttype="KM", wttype="Beran" and wttype="Ishwaran", respectively.
+
+Finally, we cover multivariate doubly-censored (MVDC) data with normal random error, which is one of MVDC data simulation setting of Kim et al. (2023+).
+
+
+In real data analysis, we apply our proposed method to the multivariate clustered PIC data using a phase 3 metastatic colorectal cancer clinical trial. This dataset is accessible for data(mCRC) in the PICBayes R package (Pan, 2021).
+
+```{r message=FALSE, warning=FALSE}
+library(PICBayes)
+data("mCRC")
+d = with(data.frame(mCRC), data.frame(U = ifelse(y==0,R,L),
+                                      V = ifelse(y==2,L,R),
+                                      # Cluster weighted data
+                                      id=(rep(c(table(SITE)),c(table(SITE)))),
+                                      # Treatment arm: 0 = FOLFIRI alone, 1 = Panitumumab + FOLFIRI.
+                                      x1= case_when(TRT_C == 0 ~ 0, #Pan et al data
+                                                    TRT_C == 1 ~ 1),
+                                      # Tumor KRAS mutation status: 0 = wild-type, 1 = mutant.
+                                      x2= case_when(KRAS_C == 0 ~ 1,
+                                                    KRAS_C == 1 ~ 0),
+                                      delta = case_when(IC == 0 ~ 0,
+                                                        IC == 1 ~ 3)
+));
+L=(log(d$U));R=log(d$V); delta=d$delta
+x = cbind(d$x1,d$x2); id=d$id;
+type=c("lasso","alasso","scad","oracle")[3]; selection=c("BIC","AIC","GCV")[3]; 
+outlier=c("without","with")[2]; beta0=c(1,1);
+rankpenIC::rankICpen(L=L,R=R,x=x,type=type,selection=selection,outlier=outlier,beta0 = beta0)$est
+```
+
+
+## References
+
+* Pan, C. (2021). PICBayes: Bayesian Models for Partly Interval-Censored Data. R package. https://CRAN.R-project.org/package=PICBayes.
+
+* Pak, D., Langohr, K., Ning, J., Cort ́es Mart ́ınez, J., G ́omez Melis, G., and Shen, Y. (2020). Modeling the coronavirus disease 2019 incubation period: impact on quarantine policy. Mathematics, 8(9):1631.
+
+* Kim et al., (2024+). Rank-based variable selection with interval-censored data.
+*Submitted to SMMR*.
