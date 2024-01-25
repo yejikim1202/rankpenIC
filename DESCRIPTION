@@ -1,20 +1,10 @@
-Package: rankICpen
+Package: rankpenIC
 Title: Rank-based variable selection with interval-censored data
 Version: 0.0.0.9000
 Authors@R: 
-    person("Yeji", "Kim", , "Yeji.Kim2@nyulangone.org", role = c("aut", "cre"),
+    person("Yeti", "Kim", , "Yeji.Kim2@nyulangone.org", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-4226-5077"))
-Description: A rank-based variable selection procedure is developed for the semiparametric accelerated
-failure time model with interval-censored observations where the l1 penalized likelihood (partial
-likelihood) method is applicable, which is not available for oracle property and limited robustness
-for heavy-tailed errors and outliers.
-The new method penalizes the Rank-type loss function for interval-censored data with the
-scad penalty, which has oracle property and a non-convex penalty function. To correctly choose
-the tuning parameters, a generalized CV and BIC criterion are proposed. Desirable properties
-of the estimator, such as the oracle properties, are established through the local quadratic
-expansion of the Rank loss function.
-In particular, our method can be easily implemented by the standard linear programming
-packages and hence numerically convenient.
+Description: A rank-based variable selection procedure is developed for the semiparametric accelerated failure time model with interval-censored observations where l1 penalized likelihood (partial likelihood) method is applicable, which is not available for oracle property and limited robustness for heavy-tailed errors and outliers.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
