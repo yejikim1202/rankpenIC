@@ -1,4 +1,4 @@
-# Introduction to rankpenIC R package
+# Introduction to `rankpenIC` R package
 
 ```{r}
 x=1
