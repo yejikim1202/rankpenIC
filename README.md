@@ -25,7 +25,7 @@ i.e., $T$ is left-censored if $L=0$ and right-censored if $R=\infty$.
 ## Description
 This R package `rankpenIC` introduces the $L_1$ regularized Rank estimator tailored for interval-censored data, aiming for simultaneous estimation and variable selection for (cluster-correlated) partially interval-censored data, which includes both double-censoring and partially interval-censoring.
 
-Vignettes is available in [here](http://htmlpreview.github.io/?https://github.com/YejiStat/rankpenIC/blob/main/vignettes/rankpenIC.html).
+Vignettes is available in [here](http://htmlpreview.github.io/?https://github.com/yejikim1202/rankpenIC/tree/main/vignettes/rankpenIC.html).
 
 
 ## Usages 
