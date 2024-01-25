@@ -12,7 +12,7 @@ in the following linear linear regression model:
 
 $$T_i = {\bf x}_i^T {\boldsymbol{\beta}}_0 + \epsilon_i,\quad i=1, \ldots ,n, $$
 
-where $e_i$ is the random error.
+where $\epsilon_i$ is the random error.
 When the data are subject to partially interval-censoring, 
 left and right endpoints of the censoring time, $L$ and $R$,
 are observed instead of $T$ such that $T\in(L,R)$.
